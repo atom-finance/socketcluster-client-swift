@@ -6,10 +6,10 @@ public class ScClient : Listener, WebSocketDelegate {
     
     var authToken : String?
     var url : String?
-    var socket : WebSocket
+    public var socket : WebSocket
     var counter : AtomicInteger
     var lastRid = AtomicInteger()
-    
+
     var onConnect : ((ScClient)-> Void)?
     var onConnectError : ((ScClient, Error?)-> Void)?
     var onDisconnect : ((ScClient, Error?)-> Void)?
