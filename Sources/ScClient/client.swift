@@ -6,8 +6,9 @@ public class ScClient : Listener, WebSocketDelegate {
     
     var authToken : String?
     var url : String?
-    var socket : WebSocket
+    public var socket : WebSocket
     var counter : AtomicInteger
+    var lastRid: AtomicInteger?
     
     var onConnect : ((ScClient)-> Void)?
     var onConnectError : ((ScClient, Error?)-> Void)?
@@ -68,8 +69,13 @@ public class ScClient : Listener, WebSocketDelegate {
                         authToken = ClientUtils.getAuthToken(message: messageObject)
                         self.onSetAuthentication?(self, authToken)
                     case .ackReceive:
-                        
-                        handleEmitAck(id: rid!, error: error as AnyObject, data: data as AnyObject)
+                     if let rid = rid {
+                        lastRid = AtomicInteger(value: rid)
+                        handleEmitAck(id: rid, error: error as AnyObject, data: data as AnyObject)
+                      } else {
+                        guard let lastRid = lastRid else { return }
+                        handleEmitAck(id: lastRid.value, error: error as AnyObject, data: data as AnyObject)
+                      }
                     case .event:
                         if hasEventAck(eventName: eventName!) {
                             handleOnAckListener(eventName: eventName!, data: data as AnyObject, ack: self.ack(cid: cid!))
